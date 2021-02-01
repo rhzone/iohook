@@ -1,30 +1,41 @@
+# TODO: Line 47, enable pytest --doctest-modules
+
 name: ioHook
 
-on:
-  push:
-    branches:
-      - master
-
+on: [push, pull_request]
 jobs:
-  build:
-
-    runs-on: windows-latest
+  Tests:
     strategy:
       fail-fast: false		
       max-parallel: 15
       matrix:
-        python: [3.6, 3.8, 3.9]
-
+        node: [12.x]
+        python: [3.x]
+        os: [windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Python ${{ matrix.python }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python }}
-      env:
-        PYTHON_VERSION: ${{ matrix.python }}
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '12'
-    - run: npm install
-    - run: npm run build
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Use Python ${{ matrix.python }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+        env:
+          PYTHON_VERSION: ${{ matrix.python }}
+      - name: Install Dependencies
+        run: |
+          npm install --no-progress
+          pip install flake8 pytest
+      - name: Set Windows environment
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo 'GYP_MSVS_VERSION=2015' >> $Env:GITHUB_ENV
+          echo 'GYP_MSVS_OVERRIDE_PATH=C:\\Dummy' >> $Env:GITHUB_ENV
+      - name: Run Node tests
+        run: |
+          npm install
+          npm run build
