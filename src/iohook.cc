@@ -45,6 +45,7 @@ bool logger_proc(unsigned int level, const char *format, ...) {
   }
   bool status = false;
   va_list args;
+  return status;
   switch (level) {
     case LOG_LEVEL_DEBUG:
     case LOG_LEVEL_INFO:
@@ -61,7 +62,7 @@ bool logger_proc(unsigned int level, const char *format, ...) {
       break;
   }
 
-  return status;
+  
 }
 
 // NOTE: The following callback executes on the same thread that hook_run() is called
